@@ -129,27 +129,6 @@ class CustomView<T extends Object?> extends StatefulWidget {
   /// Called when user taps on event tile.
   final CellTapCallback<T>? onEventTap;
 
-  /// Show weekends or not
-  ///
-  /// Default value is true.
-  ///
-  /// If it is false week view will remove weekends from week
-  /// even if weekends are added in [weekDays].
-  ///
-  /// ex, if [showWeekends] is false and [weekDays] are monday, tuesday,
-  /// saturday and sunday, only monday and tuesday will be visible in week view.
-  final bool showWeekends;
-
-  /// Defines which days should be displayed in one week.
-  ///
-  /// By default all the days will be visible.
-  /// Sequence will be monday to sunday.
-  ///
-  /// Duplicate values will be removed from list.
-  ///
-  /// ex, if there are two mondays in list it will display only one.
-  final List<WeekDays> weekDays;
-
   /// Defines how many days should be displayed on screen.
   final int showDays;
 
@@ -211,9 +190,7 @@ class CustomView<T extends Object?> extends StatefulWidget {
     this.onEventTap,
     this.onDateLongPress,
     this.onDateTap,
-    this.weekDays = WeekDays.values,
     this.showDays = 3,
-    this.showWeekends = true,
     this.startDay = WeekDays.monday,
     this.minuteSlotSize = MinuteSlotSize.minutes60,
     this.weekDetectorBuilder,
@@ -281,8 +258,6 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
 
   ScrollController get scrollController => _scrollController;
 
-  late List<WeekDays> _weekDays;
-
   final _scrollConfiguration = EventScrollConfiguration();
 
   @override
@@ -291,7 +266,7 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
 
     _reloadCallback = _reload;
 
-    _setWeekDays();
+    _totalDaysInWeek = widget.showDays;
     _setDateRange();
 
     _currentDate = (widget.initialDay ?? DateTime.now()).withoutTime;
@@ -342,7 +317,7 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
       _controller?.addListener(_reloadCallback);
     }
 
-    _setWeekDays();
+    _totalDaysInWeek = widget.showDays;
 
     // Update date range.
     if (widget.minDay != oldWidget.minDay ||
@@ -434,7 +409,6 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
                           hourHeight: _hourHeight,
                           scrollController: _scrollController,
                           eventArranger: _eventArranger,
-                          weekDays: _weekDays,
                           showDays: widget.showDays,
                           minuteSlotSize: widget.minuteSlotSize,
                           scrollConfiguration: _scrollConfiguration,
@@ -469,24 +443,6 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
     if (mounted) {
       setState(() {});
     }
-  }
-
-  void _setWeekDays() {
-    _weekDays = widget.weekDays.toSet().toList();
-
-    if (!widget.showWeekends) {
-      _weekDays
-        ..remove(WeekDays.saturday)
-        ..remove(WeekDays.sunday);
-    }
-
-    assert(
-        _weekDays.isNotEmpty,
-        "weekDays can not be empty.\n"
-        "Make sure you are providing weekdays in initialization of "
-        "WeekView. or showWeekends is true if you are providing only "
-        "saturday or sunday in weekDays.");
-    _totalDaysInWeek = widget.showDays;
   }
 
   void _updateViewDimensions() {
@@ -561,19 +517,18 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
     }
 
     _currentStartDate = _currentDate;
-    _currentEndDate = _currentDate.add(Duration(days: widget.showDays - 1));
+    _currentEndDate = _currentDate.add(Duration(days: widget.showDays));
+    
     _currentIndex =
-        _minDate.getWeekDifference(_currentEndDate, start: widget.startDay);
+        (_minDate.getDayDifference(_currentDate) / widget.showDays).floor();
   }
 
   /// Sets the minimum and maximum dates for current view.
   void _setDateRange() {
     _minDate = (widget.minDay ?? CalendarConstants.epochDate)
-        .firstDayOfWeek(start: widget.startDay)
         .withoutTime;
 
     _maxDate = (widget.maxDay ?? CalendarConstants.maxDate)
-        .lastDayOfWeek(start: widget.startDay)
         .withoutTime;
 
     assert(
@@ -582,7 +537,8 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
       "Provided minimum date: $_minDate, maximum date: $_maxDate",
     );
 
-    _totalViews = _minDate.getDayDifference(_maxDate) ~/ widget.showDays;
+    _totalViews =
+        (_minDate.getDayDifference(_maxDate) / widget.showDays).floor();
   }
 
   /// Default press detector builder. This builder will be used if
@@ -650,19 +606,6 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
               date.day.toString()),
         ],
       ),
-    );
-  }
-
-  /// Default builder for week number.
-  Widget _defaultWeekNumberBuilder(DateTime date) {
-    final daysToAdd = DateTime.thursday - date.weekday;
-    final thursday = daysToAdd > 0
-        ? date.add(Duration(days: daysToAdd))
-        : date.subtract(Duration(days: daysToAdd.abs()));
-    final weekNumber =
-        (date.difference(DateTime(thursday.year)).inDays / 7).floor() + 1;
-    return Center(
-      child: Text("$weekNumber"),
     );
   }
 
@@ -739,7 +682,6 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
 
   /// Called when user change page using any gesture or inbuilt functions.
   void _onPageChange(int index) {
-    print("new");
     if (mounted) {
       setState(() {
         _currentStartDate = DateTime(

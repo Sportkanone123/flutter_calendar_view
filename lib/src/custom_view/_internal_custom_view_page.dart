@@ -81,12 +81,6 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
   /// Called when user taps on event tile.
   final CellTapCallback<T>? onTileTap;
 
-  /// Defines which days should be displayed in one week.
-  ///
-  /// By default all the days will be visible.
-  /// Sequence will be monday to sunday.
-  final List<WeekDays> weekDays;
-
   /// Defines how many days should be displayed on screen.
   final int showDays;
 
@@ -137,7 +131,6 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
     required this.onTileTap,
     required this.onDateLongPress,
     required this.onDateTap,
-    required this.weekDays,
     required this.showDays,
     required this.minuteSlotSize,
     required this.scrollConfiguration,
@@ -147,7 +140,6 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final filteredDates = _filteredDate();
     return Container(
       height: height + weekTitleHeight,
       width: width,
@@ -162,15 +154,15 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
                 SizedBox(
                   height: weekTitleHeight,
                   width: timeLineWidth + hourIndicatorSettings.offset,
-                  child: Text(filteredDates.first.toString().substring(0, 10)),
+                  child: Text(dates.first.toString().substring(0, 10)),
                 ),
                 ...List.generate(
-                  filteredDates.length,
+                  dates.length,
                       (index) => SizedBox(
                     height: weekTitleHeight,
                     width: weekTitleWidth,
                     child: weekDayBuilder(
-                      filteredDates[index],
+                      dates[index],
                     ),
                   ),
                 )
@@ -188,11 +180,11 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
               children: [
                 SizedBox(width: timeLineWidth + hourIndicatorSettings.offset),
                 ...List.generate(
-                  filteredDates.length,
+                  dates.length,
                   (index) => SizedBox(
                     width: weekTitleWidth,
                     child: fullDayEventBuilder?.call(
-                      controller.getFullDayEvent(filteredDates[index]),
+                      controller.getFullDayEvent(dates[index]),
                       dates[index],
                     ),
                   ),
@@ -230,12 +222,12 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
                     Align(
                       alignment: Alignment.centerRight,
                       child: SizedBox(
-                        width: weekTitleWidth * filteredDates.length,
+                        width: weekTitleWidth * dates.length,
                         height: height,
                         child: Row(
                           children: [
                             ...List.generate(
-                              filteredDates.length,
+                              dates.length,
                               (index) => Container(
                                 decoration: BoxDecoration(
                                   border: Border(
@@ -258,14 +250,14 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
                                     ),
                                     EventGenerator<T>(
                                       height: height,
-                                      date: filteredDates[index],
+                                      date: dates[index],
                                       onTileTap: onTileTap,
                                       width: weekTitleWidth,
                                       eventArranger: eventArranger,
                                       eventTileBuilder: eventTileBuilder,
                                       scrollNotifier: scrollConfiguration,
                                       events: controller
-                                          .getEventsOnDay(filteredDates[index]),
+                                          .getEventsOnDay(dates[index]),
                                       heightPerMinute: heightPerMinute,
                                     ),
                                   ],
@@ -291,10 +283,5 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  List<DateTime> _filteredDate() {
-    print("l:${dates.length}");
-    return dates;
   }
 }
