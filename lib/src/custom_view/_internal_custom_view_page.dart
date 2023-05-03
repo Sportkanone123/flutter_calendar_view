@@ -154,7 +154,6 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
                 SizedBox(
                   height: weekTitleHeight,
                   width: timeLineWidth + hourIndicatorSettings.offset,
-                  child: Text(dates.first.toString().substring(0, 10)),
                 ),
                 ...List.generate(
                   dates.length,

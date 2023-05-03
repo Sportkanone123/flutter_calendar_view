@@ -517,7 +517,7 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
     }
 
     _currentStartDate = _currentDate;
-    _currentEndDate = _currentDate.add(Duration(days: widget.showDays));
+    _currentEndDate = _currentDate.add(Duration(days: widget.showDays - 1));
     
     _currentIndex =
         (_minDate.getDayDifference(_currentDate) / widget.showDays).floor();
