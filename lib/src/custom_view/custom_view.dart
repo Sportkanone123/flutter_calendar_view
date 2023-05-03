@@ -117,6 +117,9 @@ class CustomView<T extends Object?> extends StatefulWidget {
   /// Height of week day title,
   final double weekTitleHeight;
 
+  /// Color of week title.
+  final Color weekTitleColor;
+
   /// Builder to build week day.
   final DateWidgetBuilder? dayBuilder;
 
@@ -184,6 +187,7 @@ class CustomView<T extends Object?> extends StatefulWidget {
     this.weekPageHeaderBuilder,
     this.eventArranger,
     this.weekTitleHeight = 50,
+    this.weekTitleColor = Colors.white,
     this.dayBuilder,
     this.backgroundColor = Colors.white,
     this.scrollOffset = 0.0,
@@ -399,6 +403,7 @@ class CustomViewState<T extends Object?> extends State<CustomView<T>> {
                           heightPerMinute: widget.heightPerMinute,
                           hourIndicatorSettings: _hourIndicatorSettings,
                           dates: dates,
+                          weekTitleColor: widget.weekTitleColor,
                           showLiveLine: widget.showLiveTimeLineInAllDays ||
                               _showLiveTimeIndicator(dates),
                           timeLineOffset: widget.timeLineOffset,

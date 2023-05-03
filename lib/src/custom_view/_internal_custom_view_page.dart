@@ -76,6 +76,9 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
   /// Width of week title.
   final double weekTitleWidth;
 
+  /// Color of week title.
+  final Color weekTitleColor;
+
   final ScrollController scrollController;
 
   /// Called when user taps on event tile.
@@ -127,6 +130,7 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
     required this.eventArranger,
     required this.verticalLineOffset,
     required this.weekTitleWidth,
+    required this.weekTitleColor,
     required this.scrollController,
     required this.onTileTap,
     required this.onDateLongPress,
@@ -146,8 +150,9 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
-          SizedBox(
+          Container(
             width: width,
+            color: weekTitleColor,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -171,6 +176,7 @@ class InternalCustomViewPage<T extends Object?> extends StatelessWidget {
           Divider(
             thickness: 1,
             height: 1,
+            color: Colors.green,
           ),
           SizedBox(
             width: width,
